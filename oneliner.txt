@@ -1,0 +1,23 @@
+# file opens
+kubectl trace run -e 'kprobe:do_sys_open { printf("%s: %s\n", comm, str(arg1)) }' ip-10-0-0-115.ec2.internal -a
+
+
+# caturday
+kubectl port-forward pod/caturday-8475d9897d-pqw8d -n caturday :8080
+kubectl trace run -e 'uretprobe:/proc/$container_pid/exe:"main.counterValue" { printf("%d %d\n", pid, retval) }' pod/caturday-8475d9897d-8jpvp  -a -n caturday
+
+
+# flamegraph
+
+## cpu profiling sampling kernel stacks at 999 Hertz (samples per second):
+
+kubectl trace run -a -e 'profile:hz:999 { @[kstack] = count() }' ip-10-0-0-115.ec2.internal > /vagrant/stackfile
+
+## cpu profiling user level stacks at 999 Hertz:
+
+kubectl trace run -n caturday -a -e  'profile:hz:999 /pid == $container_pid/ { @[ustack] = count(); }' pod/caturday-8475d9897d-8jpvp > /vagrant/stackfile
+
+## plotting
+
+bash -c "cd ~/Projects/brendangregg/FlameGraph && ./stackcollapse-bpftrace.pl /vagrant/stackfile > /vagrant/stackfile-collapsed"
+bash -c "cd ~/Projects/brendangregg/FlameGraph && ./flamegraph.pl /vagrant/stackfile-collapsed > /vagrant/stackfile.svg"
