@@ -1,8 +1,11 @@
 #!/bin/bash
 
-set -euo pipefail
+set -xeuo pipefail
 
-clang -O2 -target bpf -c pkts.c -o pkts.o
+program=$1
+output_dir=$2
+
+clang -O2 -target bpf -c "${program}.c" -o "${output_dir}/${program}.o"
 
 function genyaml {
     file="$1"
@@ -11,7 +14,7 @@ function genyaml {
     resource="${file}-bpf"
     namespace="${file}-ns"
 
-    cat > ${file}.yaml <<EOL
+    cat > "${output_dir}/${file}.yaml" <<EOL
 ---
 apiVersion: v1
 kind: Namespace
@@ -31,7 +34,7 @@ spec:
         key: ${object}
 ---
 EOL
-    kubectl create configmap --from-file ${object} ${name} -o yaml -n ${namespace} --dry-run >> ${file}.yaml
+    kubectl create configmap --from-file "${output_dir}/${object}" ${name} -o yaml -n ${namespace} --dry-run >> "${output_dir}/${file}.yaml"
 }
 
-genyaml pkts
+genyaml $program
