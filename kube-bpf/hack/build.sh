@@ -12,20 +12,13 @@ function genyaml {
     name="${file}-config"
     object="${file}.o"
     resource="${file}-bpf"
-    namespace="${file}-ns"
 
     cat > "${output_dir}/${file}.yaml" <<EOL
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: ${namespace}
 ---
 apiVersion: bpf.sh/v1alpha1
 kind: BPF
 metadata:
   name: ${resource}
-  namespace: ${namespace}
 spec:
   program:
     valueFrom:
@@ -33,8 +26,22 @@ spec:
         name: ${name}
         key: ${object}
 ---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ${resource}
+  app: ${resource}
+labels:
+  team: bpf
+spec:
+  selector:
+    matchLabels:
+      app: bpf-${resource}
+  endpoints:
+  - port: bpf
+---
 EOL
-    kubectl create configmap --from-file "${output_dir}/${object}" ${name} -o yaml -n ${namespace} --dry-run >> "${output_dir}/${file}.yaml"
+    kubectl create configmap --from-file "${output_dir}/${object}" ${name} -o yaml --dry-run >> "${output_dir}/${file}.yaml"
 }
 
 genyaml $program
