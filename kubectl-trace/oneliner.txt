@@ -4,7 +4,7 @@ kubectl trace run -e 'kprobe:do_sys_open { printf("%s: %s\n", comm, str(arg1)) }
 
 # caturday
 kubectl port-forward deployment/caturday -n caturday :8080
-kubectl trace run -e 'uretprobe:/proc/$container_pid/exe:"main.counterValue" { printf("%d %d\n", pid, retval) }' pod/caturday-8475d9897d-8jpvp  -a -n caturday
+kubectl trace run -e 'uretprobe:/proc/$container_pid/exe:"main.counterValue" { printf("%d %d\n", pid, retval) }' pod/caturday-8475d9897d-gvtvh -a -n caturday
 
 
 # flamegraph
@@ -15,7 +15,7 @@ kubectl trace run -a -e 'profile:hz:999 { @[kstack] = count() }' ip-10-0-0-115.e
 
 ## cpu profiling user level stacks at 999 Hertz:
 
-kubectl trace run -n caturday -a -e  'profile:hz:999 /pid == $container_pid/ { @[ustack] = count(); }' pod/caturday-8475d9897d-8jpvp > /vagrant/stackfile
+kubectl trace run -n caturday -a -e  'profile:hz:999 /pid == $container_pid/ { @[ustack] = count(); }' pod/caturday-8475d9897d-gvtvh > /vagrant/stackfile
 
 ## plotting
 
