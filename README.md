@@ -1,5 +1,7 @@
 # OSCON 2019 - eBPF-powered distributed Kubernetes performance analysis
 
+[Slides](https://fntlnz.wtf/downloads/oscon2019-kubernetes-performance-analysis.pdf)
+
 This repository contains the code examples I used during OSCON 2019 for my talk titled "eBPF-powered distributed Kubernetes performance analysis".
 
 You need a Kubernetes cluster to execute what's in here!
